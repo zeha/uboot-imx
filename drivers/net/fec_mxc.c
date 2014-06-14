@@ -517,8 +517,12 @@ static int fec_open(struct eth_device *edev)
 	{
 		u32 ecr = readl(&fec->eth->ecntrl) & ~FEC_ECNTRL_SPEED;
 		u32 rcr = (readl(&fec->eth->r_cntrl) &
-				~(FEC_RCNTRL_RMII | FEC_RCNTRL_RMII_10T)) |
-				FEC_RCNTRL_RGMII | FEC_RCNTRL_MII_MODE;
+				~(FEC_RCNTRL_RGMII | FEC_RCNTRL_RMII | FEC_RCNTRL_RMII_10T));
+		if (fec->xcv_type == RGMII)
+			rcr |= FEC_RCNTRL_RGMII;
+		else if (fec->xcv_type == RMII)
+			rcr |= FEC_RCNTRL_RMII;
+
 		if (speed == _1000BASET)
 			ecr |= FEC_ECNTRL_SPEED;
 		else if (speed != _100BASET)

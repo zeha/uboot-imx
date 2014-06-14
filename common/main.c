@@ -59,6 +59,10 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
+
+#define SHOW_ENGICAM_VERSION     "Version: Engicam U-Boot 1.10\n"
+
+
 /*
  * Board-specific Platform code can reimplement show_boot_progress () if needed
  */
@@ -68,6 +72,9 @@ void show_boot_progress (int val) __attribute__((weak, alias("__show_boot_progre
 #if defined(CONFIG_UPDATE_TFTP)
 int update_tftp (ulong addr);
 #endif /* CONFIG_UPDATE_TFTP */
+
+void version_show(void);
+ 
 
 #define MAX_DELAY_STOP_STR 32
 
@@ -94,6 +101,41 @@ static int      retry_time = -1; /* -1 so can call readline before main_loop */
 int do_mdm_init = 0;
 extern void mdm_init(void); /* defined in board.c */
 #endif
+
+int stringfind (char *str, char *key)
+{
+	char *ptr=strstr(str,key);
+	if(ptr!=NULL)
+		return 1;
+	else
+		return 0;
+}
+
+// This version control the fec_address in the bootargs. If there is no
+// fec_addr it will add it
+void check_fec_on_bootargs(void)
+{
+  	char *sBootArgs = getenv("bootargs");
+	
+	if ( !stringfind (sBootArgs, "fec_mac"))
+	{		
+		char *sEthAddr = getenv("ethaddr");
+		char sNewEnv[512];
+		if(sEthAddr!=NULL)
+		{
+			strcpy(sNewEnv,sBootArgs);
+			strcat(sNewEnv, " fec_mac=");
+			strcat(sNewEnv, sEthAddr);
+			printf("Address environment setted on bootargs\n");
+			setenv ("bootargs", sNewEnv);
+		}
+		else
+		{
+			printf("WARNING: ***** No MAC address: set ethaddr *****\n");
+		}	
+		
+	}
+}
 
 /***************************************************************************
  * Watch for 'delay' seconds for autoboot stop or autoboot delay string.
@@ -1374,6 +1416,18 @@ static void process_macros (const char *input, char *output)
 		strlen (output_start), output_start);
 #endif
 }
+
+
+//! This function show on u-boot consolle on start-up the version
+//  For setting the version open file mx25_3stack.
+void version_show(void)
+{
+  printf ("\n");
+  printf (SHOW_ENGICAM_VERSION);
+  printf (SHOW_ENGICAM_NOTE);
+  printf ("\n");
+}
+
 
 /****************************************************************************
  * returns:
