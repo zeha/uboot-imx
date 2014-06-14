@@ -17,7 +17,7 @@
 #define CONFIG_CONSOLE_DEV		"ttymxc3"
 #define CONFIG_MMCROOT			"/dev/mmcblk0p2"
 
-//#define CONFIG_SYS_USE_NAND
+#define CONFIG_SYS_BOOT_NAND
 
 #include "mx6_icore_common.h"
 #include <asm/imx-common/gpio.h>
